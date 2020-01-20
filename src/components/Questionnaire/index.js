@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { Button, Card } from 'antd';
+import setAuthToken from '../../utils/setAuthorizationToken';
+import { sendQuestionnaire, getRecommendation } from '../../utils/requests';
 import { questions } from '../../questions';
 import UserInput from './UserInput';
 
@@ -56,6 +58,22 @@ class Questionnaire extends Component {
     }
 
     handleSubmit = async () => {
+        const { questions } = this.state;
+        const requestObject = {};
+
+        questions.forEach(question => {
+            if (question.paramKey) {
+                requestObject[question.paramKey] = question.answer;
+            }
+        })
+
+        let response = await sendQuestionnaire(requestObject);
+
+        let jwt = response.data.jwt;
+        localStorage.setItem('jwt', jwt);
+        setAuthToken(jwt);
+        
+        let recommendation =  await getRecommendation()
     }
 
     render() {
