@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router';
 import { Button, Card } from 'antd';
 import setAuthToken from '../../utils/setAuthorizationToken';
 import { sendQuestionnaire, getRecommendation } from '../../utils/requests';
@@ -84,7 +85,8 @@ class Questionnaire extends Component {
         localStorage.setItem('jwt', jwt);
         setAuthToken(jwt);
         let recommendation =  await getRecommendation()
-        localStorage.setItem('recommendation', recommendation.data);
+        localStorage.setItem('recommendation', JSON.stringify(recommendation.data));
+        this.props.history.push('/recommendation');
     }
 
     render() {
@@ -143,5 +145,4 @@ class Questionnaire extends Component {
     }
 }
 
-export default Questionnaire;
-
+export default withRouter(Questionnaire)
