@@ -8,8 +8,8 @@ import './style.scss';
 class Questionnaire extends Component {
     state = { 
         questions,
-        currentIndex: 0,
-        answeredQuestions: [],
+        currentQuestionIndex: 0,
+        previousQuestionIndices: [],
     };
 
     componentDidMount() {
@@ -17,9 +17,9 @@ class Questionnaire extends Component {
     }
 
     handleUserInput = userInput => {
-        const { questions, currentIndex } = this.state;
+        const { questions, currentQuestionIndex } = this.state;
         const updatedQuestions  = [...questions];
-        updatedQuestions[currentIndex].answer = userInput;
+        updatedQuestions[currentQuestionIndex].answer = userInput;
 
         this.setState({
             questions: updatedQuestions,
@@ -27,11 +27,31 @@ class Questionnaire extends Component {
     }
 
     handlePrevious = () => {
+        const updatedPreviousQuestionIndices = [...this.state.previousQuestionIndices];
+        const newCurrentQuestionIndex = updatedPreviousQuestionIndices.pop();
+        this.setState({
+            currentQuestionIndex: newCurrentQuestionIndex,
+            previousQuestionIndices: updatedPreviousQuestionIndices,
+        });
     }
 
     handleNext = () => {
+        const { questions, currentQuestionIndex, previousQuestionIndices } = this.state;
+        let nextQuestionIndex = currentQuestionIndex + 1
+        const currentQuestion = questions[currentQuestionIndex];
+
+        if (currentQuestion.options) {
+            const optionSelected = currentQuestion.options.find(option => option.value === currentQuestion.answer);
+            if (optionSelected.isNextQuestionSkipped) {
+                nextQuestionIndex++;
+            }
+        }
         this.setState({
-            currentIndex: this.state.currentIndex + 1,
+            currentQuestionIndex: nextQuestionIndex,
+            previousQuestionIndices: [
+                ...previousQuestionIndices,
+                currentQuestionIndex,
+            ],
         });
     }
 
@@ -39,36 +59,36 @@ class Questionnaire extends Component {
     }
 
     render() {
-        const { currentIndex, questions } = this.state;
+        const { currentQuestionIndex, questions } = this.state;
+        const currentQuestion = questions[currentQuestionIndex];
+        const finalQuestionIndex = questions.length - 1;
 
-        const nextButton = true 
-            ? (<Button
+        const nextButton = (
+            <Button
                 onClick={this.handleNext}
                 type="primary"
             >
                 Next
-            </Button>)
-            : null;
+            </Button>
+        );
 
-        const previousButton = true 
-            ? (<Button
+        const previousButton = (
+            <Button
                 onClick={this.handlePrevious}
                 type="primary"
             >
                 Previous
-            </Button>)
-            : null;
+            </Button>
+        );
 
-        const submitButton = false
-            ? (<Button
+        const submitButton = (
+            <Button
                 onClick={this.handleSubmit}
                 type="primary"
             >
                 Submit Answers
-            </Button>)
-            : null;
-
-        const currentQuestion = questions[currentIndex];
+            </Button>
+        );
 
         return (
             <div className="questionaire__container">
@@ -83,9 +103,9 @@ class Questionnaire extends Component {
                         question={currentQuestion}
                     />
                     <div className="questionaire__buttons">
-                        {previousButton}
-                        {nextButton}
-                        {submitButton}
+                        {currentQuestionIndex > 0 && previousButton}
+                        {currentQuestionIndex < finalQuestionIndex && nextButton}
+                        {currentQuestionIndex === finalQuestionIndex && submitButton}
                     </div>
                 </Card>
             </div>
