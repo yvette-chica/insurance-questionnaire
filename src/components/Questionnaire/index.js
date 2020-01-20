@@ -15,7 +15,11 @@ class Questionnaire extends Component {
     };
 
     componentDidMount() {
-        // TODO: Check if there is state saved in localStorage
+        // Check if the questionaire state is saved in localStorage
+        if (localStorage.questionnaireState) {
+            const newState = JSON.parse(localStorage.questionnaireState);
+            this.setState(newState);
+        }
     }
 
     handleUserInput = userInput => {
@@ -29,12 +33,16 @@ class Questionnaire extends Component {
     }
 
     handlePrevious = () => {
-        const updatedPreviousQuestionIndices = [...this.state.previousQuestionIndices];
+        const { questions, previousQuestionIndices } = this.state;
+        const updatedPreviousQuestionIndices = [...previousQuestionIndices];
         const newCurrentQuestionIndex = updatedPreviousQuestionIndices.pop();
-        this.setState({
+        const newState = {
             currentQuestionIndex: newCurrentQuestionIndex,
             previousQuestionIndices: updatedPreviousQuestionIndices,
-        });
+            questions,
+        }
+        localStorage.setItem('questionnaireState', JSON.stringify(newState));
+        this.setState(newState);
     }
 
     handleNext = () => {
@@ -48,13 +56,17 @@ class Questionnaire extends Component {
                 nextQuestionIndex++;
             }
         }
-        this.setState({
+
+        const newState = {
             currentQuestionIndex: nextQuestionIndex,
             previousQuestionIndices: [
                 ...previousQuestionIndices,
                 currentQuestionIndex,
             ],
-        });
+            questions,
+        }
+        localStorage.setItem('questionnaireState', JSON.stringify(newState));
+        this.setState(newState);
     }
 
     handleSubmit = async () => {
@@ -63,17 +75,16 @@ class Questionnaire extends Component {
 
         questions.forEach(question => {
             if (question.paramKey) {
-                requestObject[question.paramKey] = question.answer;
+                requestObject[question.paramKey] = question.answer || question.defaultAnswer;
             }
         })
 
         let response = await sendQuestionnaire(requestObject);
-
         let jwt = response.data.jwt;
         localStorage.setItem('jwt', jwt);
         setAuthToken(jwt);
-        
         let recommendation =  await getRecommendation()
+        localStorage.setItem('recommendation', recommendation.data);
     }
 
     render() {
@@ -85,6 +96,7 @@ class Questionnaire extends Component {
             <Button
                 onClick={this.handleNext}
                 type="primary"
+                disabled={!currentQuestion.answer}
             >
                 Next
             </Button>

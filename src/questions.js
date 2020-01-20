@@ -31,14 +31,15 @@ const questions = [
         prompt: 'Do you have any children?',
         type: 'string', 
         options: [
-            { value: true, label: 'yes' },
-            { value: false, label: 'No', isNextQuestionSkipped: true }
+            { value: 'YES', label: 'yes' },
+            { value: 'NO', label: 'No', isNextQuestionSkipped: true }
         ],
     },
     {
         prompt: 'How many children do you have?',
         type: 'number', 
         paramKey: 'numberOfChildren',
+        defaultAnswer: 0,
     },
     {
         prompt: 'What is your email?',
