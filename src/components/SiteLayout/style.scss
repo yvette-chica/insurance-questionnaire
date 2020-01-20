@@ -1,0 +1,20 @@
+.site-layout {
+    &__title {
+        color: white !important;
+        font-weight: bold;
+        font-size: 1.4rem;
+    }
+
+    &__header {
+        .shopping-cart {
+            float: right;
+            margin: 12px 0;
+        }
+    }
+
+    &__content {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        margin: 0 4rem;
+    }
+}
