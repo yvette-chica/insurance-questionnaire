@@ -1,0 +1,17 @@
+.recommendation {
+    &__container {
+        .ant-card {
+            margin: auto;
+            margin-bottom: 20px;
+
+            .ant-card-body {
+                display: flex;
+
+                .insurance-type, .price {
+                    flex: auto;
+                    text-transform: capitalize;
+                }
+            }
+        }
+    }
+}

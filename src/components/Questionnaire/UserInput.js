@@ -58,11 +58,7 @@ class UserInput extends Component {
             )
         }
 
-        return (
-            <div>
-                {inputComponent}
-            </div>
-        );
+        return inputComponent;
     }
 }
 

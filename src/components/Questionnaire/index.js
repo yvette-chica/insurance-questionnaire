@@ -3,6 +3,7 @@ import { Redirect } from 'react-router';
 import { Button, Card } from 'antd';
 import setAuthToken from '../../utils/setAuthorizationToken';
 import { sendQuestionnaire, getRecommendation } from '../../utils/requests';
+import DisplayError from '../DisplayError';
 import { questions } from '../../questions';
 import UserInput from './UserInput';
 
@@ -13,6 +14,7 @@ class Questionnaire extends Component {
         questions,
         currentQuestionIndex: 0,
         previousQuestionIndices: [],
+        error: null,
     };
 
     componentDidMount() {
@@ -24,7 +26,10 @@ class Questionnaire extends Component {
     }
 
     saveQuestionnaireState = () => {
-        localStorage.setItem('questionnaireState', JSON.stringify(this.state));
+        const { questions, currentQuestionIndex, previousQuestionIndices} = this.state;
+        localStorage.setItem('questionnaireState', JSON.stringify({
+            questions, currentQuestionIndex, previousQuestionIndices,
+        }));
     }
 
     handleUserInput = userInput => {
@@ -50,24 +55,28 @@ class Questionnaire extends Component {
 
     handleNext = () => {
         const { questions, currentQuestionIndex, previousQuestionIndices } = this.state;
-        let nextQuestionIndex = currentQuestionIndex + 1
+        let nextQuestionIndex = currentQuestionIndex;
         const currentQuestion = questions[currentQuestionIndex];
 
-        if (currentQuestion.options) {
-            const optionSelected = currentQuestion.options.find(option => option.value === currentQuestion.answer);
-            if (optionSelected.isNextQuestionSkipped) {
-                nextQuestionIndex += 1;
+        // Only go to the next question if one exists & user has input an answer
+        if (questions[currentQuestionIndex + 1] && currentQuestion.answer){
+            nextQuestionIndex += 1;
+            if (currentQuestion.options) {
+                const optionSelected = currentQuestion.options.find(option => option.value === currentQuestion.answer);
+                if (optionSelected.isNextQuestionSkipped) {
+                    nextQuestionIndex += 1;
+                }
             }
-        }
 
-        this.setState({
-            currentQuestionIndex: nextQuestionIndex,
-            previousQuestionIndices: [
-                ...previousQuestionIndices,
-                currentQuestionIndex,
-            ],
-        });
-        this.saveQuestionnaireState();
+            this.setState({
+                currentQuestionIndex: nextQuestionIndex,
+                previousQuestionIndices: [
+                    ...previousQuestionIndices,
+                    currentQuestionIndex,
+                ],
+            });
+            this.saveQuestionnaireState();
+        }
     }
 
     handleSubmit = async () => {
@@ -81,51 +90,29 @@ class Questionnaire extends Component {
             }
         })
 
-        let response = await sendQuestionnaire(requestObject);
-        let jwt = response.data.jwt;
-        setAuthToken(jwt);
-        let recommendation =  await getRecommendation()
-        localStorage.setItem('recommendation', JSON.stringify(recommendation.data));
-        localStorage.setItem('jwt', jwt);
-        window.location.reload(true);
+        try {
+            let response = await sendQuestionnaire(requestObject);
+            let jwt = response.data.jwt;
+            setAuthToken(jwt);
+            let recommendation =  await getRecommendation()
+            localStorage.setItem('recommendation', JSON.stringify(recommendation.data));
+            localStorage.setItem('jwt', jwt);
+            window.location.reload(true);
+        } catch(error) {
+            this.setState({ error })
+        }
     }
 
     render() {
         if (localStorage.jwt) {
             return <Redirect to={{ pathname: '/recommendations' }} />
+        } else if (this.state.error) {
+            return <DisplayError error={this.state.error} />;
         }
 
         const { currentQuestionIndex, questions } = this.state;
         const currentQuestion = questions[currentQuestionIndex];
         const finalQuestionIndex = questions.length - 1;
-
-        const nextButton = (
-            <Button
-                onClick={this.handleNext}
-                type="primary"
-                disabled={!currentQuestion.answer}
-            >
-                Next
-            </Button>
-        );
-
-        const previousButton = (
-            <Button
-                onClick={this.handlePrevious}
-                type="primary"
-            >
-                Previous
-            </Button>
-        );
-
-        const submitButton = (
-            <Button
-                onClick={this.handleSubmit}
-                type="primary"
-            >
-                Submit Answers
-            </Button>
-        );
 
         return (
             <div className="questionaire__container">
@@ -140,9 +127,31 @@ class Questionnaire extends Component {
                         question={currentQuestion}
                     />
                     <div className="questionaire__buttons">
-                        {currentQuestionIndex > 0 && previousButton}
-                        {currentQuestionIndex < finalQuestionIndex && nextButton}
-                        {currentQuestionIndex === finalQuestionIndex && submitButton}
+                        {currentQuestionIndex > 0 && (
+                            <Button
+                                onClick={this.handlePrevious}
+                                type="primary"
+                            >
+                                Previous
+                            </Button>
+                        )}
+                        {currentQuestionIndex < finalQuestionIndex && (
+                            <Button
+                                onClick={this.handleNext}
+                                type="primary"
+                                disabled={!currentQuestion.answer}
+                            >
+                                Next
+                            </Button>
+                        )}
+                        {currentQuestionIndex === finalQuestionIndex && (
+                            <Button
+                                onClick={this.handleSubmit}
+                                type="primary"
+                            >
+                                Submit Answers
+                            </Button>
+                        )}
                     </div>
                 </Card>
             </div>
@@ -150,4 +159,4 @@ class Questionnaire extends Component {
     }
 }
 
-export default Questionnaire
+export default Questionnaire 

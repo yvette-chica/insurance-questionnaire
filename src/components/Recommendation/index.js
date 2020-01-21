@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
-import { Card } from 'antd';
+import { Card, Result } from 'antd';
+
+import './style.scss';
 
 export default class  Recommendation extends Component {
     state = {
@@ -15,21 +17,22 @@ export default class  Recommendation extends Component {
 
     render() {
         return (
-            <div>
-                <h1>We got your recommendation</h1>
-                <h3>
-                    Based on your answers, this is what makes sense for you
-                    and what you should pay.
-                </h3>
+            <div className="recommendation__container">
+                <Result
+                    status="success"
+                    title="We got your recommendation"
+                    subTitle="Based on your answers, this is what makes sense for you
+                    and what you should pay."
+                />
                 {
                     this.state.recommendation.map(
                         (option, index) => (
                             <Card key={index} style={{ maxWidth: 800 }}>
-                                <div>
-                                    {option.type}
+                                <div className="insurance-type">
+                                    {option.type.toLowerCase().replace('_', ' ')}
                                 </div>
-                                <div>
-                                    {`${option.price.amount} euros per ${option.price.periodicity}`}
+                                <div className="price">
+                                    {`${option.price.amount} euros per ${option.price.periodicity.toLowerCase()}`}
                                 </div>
                             </Card>
                         )
