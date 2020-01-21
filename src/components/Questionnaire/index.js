@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { withRouter } from 'react-router';
+import { Redirect } from 'react-router';
 import { Button, Card } from 'antd';
 import setAuthToken from '../../utils/setAuthorizationToken';
 import { sendQuestionnaire, getRecommendation } from '../../utils/requests';
@@ -23,6 +23,10 @@ class Questionnaire extends Component {
         }
     }
 
+    saveQuestionnaireState = () => {
+        localStorage.setItem('questionnaireState', JSON.stringify(this.state));
+    }
+
     handleUserInput = userInput => {
         const { questions, currentQuestionIndex } = this.state;
         const updatedQuestions  = [...questions];
@@ -34,16 +38,14 @@ class Questionnaire extends Component {
     }
 
     handlePrevious = () => {
-        const { questions, previousQuestionIndices } = this.state;
+        const { previousQuestionIndices } = this.state;
         const updatedPreviousQuestionIndices = [...previousQuestionIndices];
         const newCurrentQuestionIndex = updatedPreviousQuestionIndices.pop();
-        const newState = {
+        this.setState({
             currentQuestionIndex: newCurrentQuestionIndex,
             previousQuestionIndices: updatedPreviousQuestionIndices,
-            questions,
-        }
-        localStorage.setItem('questionnaireState', JSON.stringify(newState));
-        this.setState(newState);
+        });
+        this.saveQuestionnaireState();
     }
 
     handleNext = () => {
@@ -54,23 +56,22 @@ class Questionnaire extends Component {
         if (currentQuestion.options) {
             const optionSelected = currentQuestion.options.find(option => option.value === currentQuestion.answer);
             if (optionSelected.isNextQuestionSkipped) {
-                nextQuestionIndex++;
+                nextQuestionIndex += 1;
             }
         }
 
-        const newState = {
+        this.setState({
             currentQuestionIndex: nextQuestionIndex,
             previousQuestionIndices: [
                 ...previousQuestionIndices,
                 currentQuestionIndex,
             ],
-            questions,
-        }
-        localStorage.setItem('questionnaireState', JSON.stringify(newState));
-        this.setState(newState);
+        });
+        this.saveQuestionnaireState();
     }
 
     handleSubmit = async () => {
+        this.saveQuestionnaireState();
         const { questions } = this.state;
         const requestObject = {};
 
@@ -82,14 +83,18 @@ class Questionnaire extends Component {
 
         let response = await sendQuestionnaire(requestObject);
         let jwt = response.data.jwt;
-        localStorage.setItem('jwt', jwt);
         setAuthToken(jwt);
         let recommendation =  await getRecommendation()
         localStorage.setItem('recommendation', JSON.stringify(recommendation.data));
-        this.props.history.push('/recommendation');
+        localStorage.setItem('jwt', jwt);
+        window.location.reload(true);
     }
 
     render() {
+        if (localStorage.jwt) {
+            return <Redirect to={{ pathname: '/recommendations' }} />
+        }
+
         const { currentQuestionIndex, questions } = this.state;
         const currentQuestion = questions[currentQuestionIndex];
         const finalQuestionIndex = questions.length - 1;
@@ -145,4 +150,4 @@ class Questionnaire extends Component {
     }
 }
 
-export default withRouter(Questionnaire)
+export default Questionnaire

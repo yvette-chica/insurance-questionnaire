@@ -29,8 +29,20 @@ function App() {
                                         }} />
                                 )
                             }
-                        >
-                        </Route>
+                        />
+                        <Route
+                            path="/"
+                            render={
+                                ({ location }) => (
+                                    jwt
+                                        ? <Recommendation />
+                                        : <Redirect to={{
+                                            pathname: "/questionnaire",
+                                            state: { from: location },
+                                        }} />
+                                )
+                            }
+                        />
                     </Switch>
                 </Layout>
             </BrowserRouter>
