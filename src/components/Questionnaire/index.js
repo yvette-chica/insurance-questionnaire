@@ -15,6 +15,7 @@ class Questionnaire extends Component {
         currentQuestionIndex: 0,
         previousQuestionIndices: [],
         error: null,
+        isLoading: false,
     };
 
     componentDidMount() {
@@ -63,6 +64,7 @@ class Questionnaire extends Component {
             nextQuestionIndex += 1;
             if (currentQuestion.options) {
                 const optionSelected = currentQuestion.options.find(option => option.value === currentQuestion.answer);
+                // Skip the following question if the selected option has the isNextQuestion skipped flag
                 if (optionSelected.isNextQuestionSkipped) {
                     nextQuestionIndex += 1;
                 }
@@ -81,6 +83,7 @@ class Questionnaire extends Component {
 
     handleSubmit = async () => {
         this.saveQuestionnaireState();
+        this.setState({ isLoading: true });
         const { questions } = this.state;
         const requestObject = {};
 
@@ -110,7 +113,7 @@ class Questionnaire extends Component {
             return <DisplayError error={this.state.error} />;
         }
 
-        const { currentQuestionIndex, questions } = this.state;
+        const { currentQuestionIndex, questions, isLoading } = this.state;
         const currentQuestion = questions[currentQuestionIndex];
         const finalQuestionIndex = questions.length - 1;
 
@@ -148,6 +151,7 @@ class Questionnaire extends Component {
                             <Button
                                 onClick={this.handleSubmit}
                                 type="primary"
+                                loading={isLoading}
                             >
                                 Submit Answers
                             </Button>
