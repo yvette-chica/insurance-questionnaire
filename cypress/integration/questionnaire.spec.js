@@ -7,14 +7,14 @@ const userInfo = {
 }
 
 describe('The Questionnaire Page', function() {
-    it('redirects from / to /questionnaire when there is no jwt', function() {
+    it('redirects from /recommendation to / when there is no jwt', function() {
         // Assure jwt not saved in localStorage
         cy.clearLocalStorage()
-        cy.visit('/')
+        cy.visit('/recommendation')
         // If we don't have a jwt we should be routed to /questionnaire
-        cy.url().should('include', '/questionnaire')
+        cy.url().should('not.include', '/recommendation')
     })
-    it('reroutes to /recommendation upon submission', function() {
+    it('reroutes to /recommendation upon questionnaire submission', function() {
         cy.visit('/')
         // Enter first name
         cy.get('input.ant-input').type(`${userInfo.firstName}{enter}`)

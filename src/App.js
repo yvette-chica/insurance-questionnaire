@@ -14,18 +14,14 @@ function App() {
             <BrowserRouter>
                 <Layout>
                     <Switch>
-                        <Route path="/questionnaire">
-                            <Questionnaire />
-                        </Route>
                         <Route
                             path="/recommendation"
                             render={
-                                ({ location }) => (
+                                () => (
                                     jwt
                                         ? <Recommendation />
                                         : <Redirect to={{
-                                            pathname: "/questionnaire",
-                                            state: { from: location },
+                                            pathname: "/",
                                         }} />
                                 )
                             }
@@ -33,13 +29,12 @@ function App() {
                         <Route
                             path="/"
                             render={
-                                ({ location }) => (
+                                () => (
                                     jwt
-                                        ? <Recommendation />
-                                        : <Redirect to={{
-                                            pathname: "/questionnaire",
-                                            state: { from: location },
+                                        ? <Redirect to={{
+                                            pathname: "/recommendation",
                                         }} />
+                                        : <Questionnaire />
                                 )
                             }
                         />
