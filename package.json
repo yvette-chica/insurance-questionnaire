@@ -21,7 +21,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "yarn build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "cypress:open": "cypress open"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -38,5 +39,8 @@
       "last 1 safari version"
     ]
   },
-  "homepage": "https://yvette-chica.github.io/insurance-questionnaire"
+  "homepage": "https://yvette-chica.github.io/insurance-questionnaire",
+  "devDependencies": {
+    "cypress": "^3.8.2"
+  }
 }

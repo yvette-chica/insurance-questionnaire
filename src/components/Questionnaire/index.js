@@ -108,7 +108,7 @@ class Questionnaire extends Component {
 
     render() {
         if (localStorage.jwt) {
-            return <Redirect to={{ pathname: '/recommendations' }} />
+            return <Redirect to={{ pathname: '/recommendation' }} />
         } else if (this.state.error) {
             return <DisplayError error={this.state.error} />;
         }
@@ -134,6 +134,7 @@ class Questionnaire extends Component {
                             <Button
                                 onClick={this.handlePrevious}
                                 type="primary"
+                                className="previous"
                             >
                                 Previous
                             </Button>
@@ -143,6 +144,7 @@ class Questionnaire extends Component {
                                 onClick={this.handleNext}
                                 type="primary"
                                 disabled={!currentQuestion.answer}
+                                className="next"
                             >
                                 Next
                             </Button>
@@ -152,6 +154,7 @@ class Questionnaire extends Component {
                                 onClick={this.handleSubmit}
                                 type="primary"
                                 loading={isLoading}
+                                className="submit"
                             >
                                 Submit Answers
                             </Button>
